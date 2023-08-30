@@ -30,6 +30,9 @@
 .idea/          # JetBrains IDEs
 .vscode/        # Visual Studio Code
 
+# Compiled Source
+__pycache__/    # Python
+
 # Miscelaneous
 *.swp           # Vim swap files
 *.swo           # Vim session files
