@@ -32,7 +32,7 @@
 import sys
 from pathlib import Path
 
-from scripts import ModifyCSV, CSVToDB
+from cars_csvmodify import ModifyCSV, CSVToDB
 
 
 def main(input_file: Path, output_file: Path, db_config_file: Path) -> None:
