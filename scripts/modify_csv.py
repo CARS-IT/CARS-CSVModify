@@ -57,7 +57,8 @@ class ModifyCSV:
     input_file: Path = field(compare=False)
     output_file: Path = field(compare=False)
 
-    _columns: list = field(default_factory=lambda: ["Make", "Model", "Status", "Location", "SerialNumber"], compare=False)
+    columns: list = field(init=False, default_factory=lambda: ["Make", "Model", "Status", "Location", "SerialNumber"], compare=False)
+
     _directory: Path = field(init=False, compare=False, repr=False)
     _temp_file: Path = field(init=False, compare=False, repr=False)
     _is_backup: bool = field(init=False, default=False, compare=False, repr=False)
@@ -88,9 +89,9 @@ class ModifyCSV:
         to the beginning and to the end of the list of columns.
         """
         # Add the required columns to the beginning of the list of columns
-        self._columns = ["Hostname"] + self._columns
-        self._columns.append("MAC")
-        self._columns.append("IP")
+        self.columns = ["Hostname"] + self.columns
+        self.columns.append("MAC")
+        self.columns.append("IP")
 
     def _modify(self) -> None:
         
@@ -106,10 +107,10 @@ class ModifyCSV:
             return
         
         # Set the columns for the output file
-        df = df[self._columns]
+        df = df[self.columns]
     
         # Forward fill missing values for selected columns
-        columns_to_fill = self._columns.copy()
+        columns_to_fill = self.columns.copy()
         columns_to_fill.remove('IP')
         df[columns_to_fill] = df[columns_to_fill].fillna(method="ffill")
 
@@ -163,27 +164,3 @@ class ModifyCSV:
             self._modify()
         finally:
             self._cleanup()
-
-
-if __name__ == "__main__":
-
-    # Provide example usage for the file in case if needed
-    if len(sys.argv) != 3:
-        print("Usage: python modify_csv.py <input_file> <output_file>")
-        sys.exit(1)
-
-    # Check for proper input filename
-    input_file = Path(sys.argv[1]).resolve()
-    if not input_file.exists():
-        print(f"Error: The input file {input_file} does not exist.")
-        sys.exit(1)
-
-    # Check for proper output filename
-    output_file = Path(sys.argv[2]).resolve()
-    if not output_file.parent.exists():
-        print(f"Error: The output directory {output_file} does not exist.")
-        sys.exit(1)
-
-    # Create an instance of the ModifyCSV class
-    modify_csv = ModifyCSV(input_file=input_file, output_file=output_file)
-    modify_csv.start()
