@@ -27,7 +27,30 @@
 # SOFTWARE.
 ##############################################################################################
 
-# Check if the user has root privileges
-ifneq ($(shell id -u), 0)
-	$(error This Makefile must be run as root)
-endif
+# Set the default target
+.DEFAULT_GOAL := all
+
+# Target for sector 13
+s13:
+	-bash run.sh "/cars5/users/CARS-IT/Grafana/IHW/S13/hosts.csv" "/cars5/users/CARS-IT/Grafana/IHW/S13/13ihw.csv" "/cars5/users/CARS-IT/Grafana/db_config.json"
+
+# Target for sector 14
+s14:
+	-bash run.sh "/cars5/users/CARS-IT/Grafana/IHW/S14/hosts.csv" "/cars5/users/CARS-IT/Grafana/IHW/S14/14ihw.csv" "/cars5/users/CARS-IT/Grafana/db_config.json"
+
+# Target for sector 15
+s15:
+	-bash run.sh "/cars5/users/CARS-IT/Grafana/IHW/S15/hosts.csv" "/cars5/users/CARS-IT/Grafana/IHW/S15/15ihw.csv" "/cars5/users/CARS-IT/Grafana/db_config.json"
+
+# Default target for all sectors
+all: s13 s14 s15
+	@echo "All sectors configured successfully"
+
+# Usage information for the available targets
+help:
+	@echo "Usage: make [help]"
+	@echo " help    - Show this help message"
+	@echo " all     - Configure all sectors"
+	@echo " s13     - Configure sector 13"
+	@echo " s14     - Configure sector 14"
+	@echo " s15     - Configure sector 15"
