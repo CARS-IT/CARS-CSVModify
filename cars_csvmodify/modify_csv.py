@@ -112,7 +112,7 @@ class ModifyCSV:
         # Forward fill missing values for selected columns
         columns_to_fill = self.columns.copy()
         columns_to_fill.remove('IP')
-        df[columns_to_fill] = df[columns_to_fill].fillna(method="ffill")
+        df[columns_to_fill] = df[columns_to_fill].ffill()
 
         # Format the MAC addresses
         df["MAC"] = df["MAC"].str.replace(":", "", regex=False).str.lower()
