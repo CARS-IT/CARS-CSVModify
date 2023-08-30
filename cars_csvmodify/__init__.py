@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 ##############################################################################################
 # Script Name: __init__.py
-# Description: This script indicates that the cars_csvmodify folder is a package.          
+# Description: This script indicates that the cars_csvmodify folder is a package.
 #
 # License: MIT License
 #

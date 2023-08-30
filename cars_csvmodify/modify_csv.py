@@ -3,7 +3,7 @@
 # Script Name: modify_csv.py
 # Description: This script modifies the csv file that contains the data of the hosts for
 #              each sector; can be modified to add or remove columns. The Hostname, MAC and
-#              IP columns are required and added automatically by the script.               
+#              IP columns are required and added automatically by the script.
 #
 # License: MIT License
 #
@@ -42,11 +42,11 @@ class ModifyCSV:
     This class modifies the csv file that contains the data of the hosts for
     each sector; can be modified to add or remove columns. The Hostname, MAC and
     IP columns are required and added automatically by the script.
-    
+
     In order to use this class, you must provide the input file and output file
     as arguments to the class. The input file is the file that will be modified
     and the output file is the file that will be created with the modifications.
-    
+
     The columns attribute is a list of columns that will be added to the output
     file. The columns are added in the order that they are provided in the list.
     The default columns are ["Make", "Model", "Status", "Location", "SerialNumber"].
@@ -57,7 +57,11 @@ class ModifyCSV:
     input_file: Path = field(compare=False)
     output_file: Path = field(compare=False)
 
-    columns: list = field(init=False, default_factory=lambda: ["Make", "Model", "Status", "Location", "SerialNumber"], compare=False)
+    columns: list = field(
+        init=False,
+        default_factory=lambda: ["Make", "Model", "Status", "Location", "SerialNumber"],
+        compare=False,
+    )
 
     _directory: Path = field(init=False, compare=False, repr=False)
     _temp_file: Path = field(init=False, compare=False, repr=False)
@@ -94,7 +98,6 @@ class ModifyCSV:
         self.columns.append("IP")
 
     def _modify(self) -> None:
-        
         try:
             # Read the input file into a dataframe
             if self._is_backup:
@@ -105,21 +108,23 @@ class ModifyCSV:
         except (pd.errors.ParserError, FileNotFoundError):
             print(f"Error: The input file {file} is not a valid csv file.")
             return
-        
+
         # Set the columns for the output file
         df = df[self.columns]
-    
+
         # Forward fill missing values for selected columns
         columns_to_fill = self.columns.copy()
-        columns_to_fill.remove('IP')
+        columns_to_fill.remove("IP")
         df[columns_to_fill] = df[columns_to_fill].ffill()
 
         # Format the MAC addresses
         df["MAC"] = df["MAC"].str.replace(":", "", regex=False).str.lower()
 
         # Format the Hostnames
-        df["Hostname"] = df["Hostname"].str.replace(".cars.aps.anl.gov", "", regex=False)
-    
+        df["Hostname"] = df["Hostname"].str.replace(
+            ".cars.aps.anl.gov", "", regex=False
+        )
+
         # Convert the IP column to string for grouping and sorting
         df["IP"] = df["IP"].astype(str)
 
@@ -141,7 +146,7 @@ class ModifyCSV:
         Cleans up the temporary file created by the script,
         otherwise it moves the output file into a backup file
         and removes any old backup files.
-        """ 
+        """
         if self._is_backup:
             # Remove the temp file if it exists
             self._directory.joinpath("temp.csv").unlink()

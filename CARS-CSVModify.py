@@ -43,15 +43,18 @@ def main(input_file: Path, output_file: Path, db_config_file: Path) -> None:
     modify_csv.start()
 
     # Create an instance of the CSVToDB class
-    csv_to_db = CSVToDB(csv_file=output_file, db_config_file=db_config_file, columns=modify_csv.columns)
+    csv_to_db = CSVToDB(
+        csv_file=output_file, db_config_file=db_config_file, columns=modify_csv.columns
+    )
     csv_to_db.convert_csv_to_db_table()
 
 
 if __name__ == "__main__":
-
     # Provide example usage for the file in case if needed
     if len(sys.argv) != 4:
-        print("Usage: python CARS-CSVModify.py <input_file> <output_file> <db_config_file>")
+        print(
+            "Usage: python CARS-CSVModify.py <input_file> <output_file> <db_config_file>"
+        )
         sys.exit(1)
 
     # Check for proper input filename

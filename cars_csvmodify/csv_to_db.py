@@ -2,7 +2,7 @@
 ##############################################################################################
 # Script Name: csv_to_db.py
 # Description: This script converts the csv file that contains the data of the hosts for
-#              each sector to a table for MariaDB.            
+#              each sector to a table for MariaDB.
 #
 # License: MIT License
 #
@@ -30,7 +30,7 @@
 ##############################################################################################
 
 import sys
-import json 
+import json
 import mariadb
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -38,7 +38,6 @@ from pathlib import Path
 
 @dataclass
 class CSVToDB:
-
     csv_file: Path = field(compare=False)
     db_config_file: Path = field(compare=False)
     columns: list = field(default_factory=list, compare=False)
@@ -51,8 +50,10 @@ class CSVToDB:
             with open(self.db_config_file, "r") as f:
                 db_config = json.load(f)
         except Exception as e:
-            print(f"Error: Could not read the configuration file {self.db_config_file}.")
-            
+            print(
+                f"Error: Could not read the configuration file {self.db_config_file}."
+            )
+
         # Try to connect to the database
         try:
             connection = mariadb.connect(**db_config)
