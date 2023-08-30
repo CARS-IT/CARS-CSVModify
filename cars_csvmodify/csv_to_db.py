@@ -79,8 +79,20 @@ class CSVToDB:
             try:
                 create_table_query = f"CREATE TABLE {self._table_name} ({', '.join([f'{col} VARCHAR(255)' for col in self.columns])})"
                 cursor.execute(create_table_query)
-                connection.commit()
 
+                # Add the data from the csv file to the table
+                query = f"""
+                LOAD DATA INFILE '{self.csv_file}'
+                INTO TABLE {self._table_name}
+                FIELDS TERMINATED BY ','
+                ENCLOSED BY '"'
+                LINES TERMINATED BY '\n'
+                IGNORE 1 ROWS
+                """
+                cursor.execute(query)
+
+                # Commit the changes
+                connection.commit()
             except mariadb.Error as e:
                 print(f"Error: Could not create the table {self._table_name}: {e}")
                 sys.exit(1)
