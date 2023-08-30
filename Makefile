@@ -32,15 +32,15 @@
 
 # Target for sector 13
 s13:
-	-bash run.sh "/cars5/users/CARS-IT/Grafana/IHW/S13/hosts.csv" "/cars5/users/CARS-IT/Grafana/IHW/S13/13ihw.csv" "/cars5/users/CARS-IT/Grafana/db_config.json"
+	-bash run.sh "/cars5/users/CARS-IT/Grafana/IHW/S13/hosts.csv" "/cars5/users/CARS-IT/Grafana/IHW/S13/s13ihw.csv" "/cars5/users/CARS-IT/Grafana/db_config.json"
 
 # Target for sector 14
 s14:
-	-bash run.sh "/cars5/users/CARS-IT/Grafana/IHW/S14/hosts.csv" "/cars5/users/CARS-IT/Grafana/IHW/S14/14ihw.csv" "/cars5/users/CARS-IT/Grafana/db_config.json"
+	-bash run.sh "/cars5/users/CARS-IT/Grafana/IHW/S14/hosts.csv" "/cars5/users/CARS-IT/Grafana/IHW/S14/s14ihw.csv" "/cars5/users/CARS-IT/Grafana/db_config.json"
 
 # Target for sector 15
 s15:
-	-bash run.sh "/cars5/users/CARS-IT/Grafana/IHW/S15/hosts.csv" "/cars5/users/CARS-IT/Grafana/IHW/S15/15ihw.csv" "/cars5/users/CARS-IT/Grafana/db_config.json"
+	-bash run.sh "/cars5/users/CARS-IT/Grafana/IHW/S15/hosts.csv" "/cars5/users/CARS-IT/Grafana/IHW/S15/s15ihw.csv" "/cars5/users/CARS-IT/Grafana/db_config.json"
 
 # Default target for all sectors
 all: s13 s14 s15
