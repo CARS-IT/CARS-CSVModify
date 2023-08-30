@@ -42,7 +42,12 @@ function run {
     output_file=$2
     db_config=$3
 
-    python CARS-CSVModify.py $input_file $output_file $db_config
+    # Check if the input file exists
+    if [ ! -f "$input_file" ]; then
+        echo "Input file $input_file does not exist, skipping..."
+    else
+        python CARS-CSVModify.py $input_file $output_file $db_config
+    fi
 }
 
 # Chek if the user provided the input file, output file and the db_config file
