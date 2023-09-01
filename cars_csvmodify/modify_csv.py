@@ -30,7 +30,7 @@
 # SOFTWARE.
 ##############################################################################################
 
-import sys
+import numpy as np
 import pandas as pd
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -133,6 +133,12 @@ class ModifyCSV:
 
         # Drop duplicate IP entries and keep the latest Hostname
         df.drop_duplicates(subset=["IP"], keep="first", inplace=True)
+
+        # Replace duplicate SerialNumber values with NaN
+        if "SerialNumber" in self.columns:
+            df["SerialNumber"] = df["SerialNumber"].where(
+                ~df["SerialNumber"].duplicated(keep="last"), np.nan
+            )
 
         # Drop NaN IP entries
         df = df.drop(df[df["IP"] == "nan"].index)
