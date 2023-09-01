@@ -55,6 +55,20 @@ sudo systemctl enable --now csv-modify.timer
 
 This repository contains a copy of the CARS-CSVModify directory, excluding any database configuration files. The database used is a MariaDB previously configured by LibreNMS. Both the LibreNMS and the CSV files contain information about the devices connected to the CARS network.
 
+Besides the automated way of converting the CSV files (systemd) you can manually convert files. Navigate to the directory of the project and run the following commands.:
+
+```bash
+# The make default target will make the files for all sectors
+make
+
+# the make s13, s14, s15 for each sector
+make s13
+make s14
+make s15
+```
+
+Make sure to take in account any modifications you made to the make file.
+
 ------------
 ## Contributing
 
