@@ -59,7 +59,7 @@ class ModifyCSV:
 
     columns: list = field(
         init=False,
-        default_factory=lambda: ["Make", "Model", "Status", "Location", "SerialNumber"],
+        default_factory=lambda: ["Make", "Model", "Status", "Location", "SerialNumber", "host_id"],
         compare=False,
     )
 
@@ -142,6 +142,10 @@ class ModifyCSV:
 
         # Drop NaN IP entries
         df = df.drop(df[df["IP"] == "nan"].index)
+
+        # Convert the "host_id" column to integer
+        if "host_id" in self.columns:
+            df["host_id"] = df["host_id"].astype(int)
 
         # Write the dataframe to the csv file. If the file already exists,
         # it will be overwritten.
