@@ -30,17 +30,17 @@ Make sure all you install all the requirements for the project.
 
 #### Source
 
-Download the github repository and modify the Makefile in order to change the filepath for the input, the output and the db_config files.
+Download the GitHub repository and modify the Makefile in order to change the filepath for the input, the output and the db_config files.
 
 ```bash
 git clone -b main https://github.com/skordaschristofanis/CARS-CSVModify.git
 ```
 
-You can change the columns for the output file, but the MAC, IP and Hostname columns are required. In order to modify the columns open the modify_csv.py file in the cars_csvmodify package and add or remove columns from the default_factory option of the columns variable.
+You can change the columns for the output file, but the MAC, IP and Hostname, host_id and Data columns are required. In order to modify the columns open the modify_csv.py file in the cars_csvmodify package and add or remove columns from the default_factory option of the columns variable.
 
 #### Systemd Services
 
-There is a timer (set to run every 5 minutes) and an associated service with this project. In order to use these you need to first copy the contents of the systemd folder to /etc/systemd/system and the enable both the service and the timer. 
+There is a timer (set to run every 5 minutes) and an associated service with this project. In order to use these you need to first copy the contents of the systemd folder to /etc/systemd/system and then enable both the service and the timer. 
 
 Navigate to the project directory and run the following commands:
 
