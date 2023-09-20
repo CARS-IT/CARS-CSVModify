@@ -2,8 +2,8 @@
 ##############################################################################################
 # Script Name: modify_csv.py
 # Description: This script modifies the csv file that contains the data of the hosts for
-#              each sector; can be modified to add or remove columns. The Hostname, MAC and
-#              IP columns are required and added automatically by the script.
+#              each sector; can be modified to add or remove columns. The Hostname(Data), MAC
+#              and IP columns are required and added automatically by the script.
 #
 # License: MIT License
 #
@@ -40,8 +40,8 @@ from pathlib import Path
 class ModifyCSV:
     """
     This class modifies the csv file that contains the data of the hosts for
-    each sector; can be modified to add or remove columns. The Hostname, MAC and
-    IP columns are required and added automatically by the script.
+    each sector; can be modified to add or remove columns. The Hostname, Data, MAC
+    IP and host_id columns are required and added automatically by the script.
 
     In order to use this class, you must provide the input file and output file
     as arguments to the class. The input file is the file that will be modified
@@ -49,7 +49,7 @@ class ModifyCSV:
 
     The columns attribute is a list of columns that will be added to the output
     file. The columns are added in the order that they are provided in the list.
-    The default columns are ["Make", "Model", "Status", "Location", "SerialNumber"].
+    The default columns are ["SerialNumber", "Make", "Model", "Status", "Location"].
     To provide a different list of columns, you can provide a list of strings
     to the columns attribute.
     """
@@ -59,7 +59,7 @@ class ModifyCSV:
 
     columns: list = field(
         init=False,
-        default_factory=lambda: ["Make", "Model", "Status", "Location", "SerialNumber", "host_id"],
+        default_factory=lambda: ["SerialNumber", "Make", "Model", "Status", "Location"], 
         compare=False,
     )
 
@@ -90,12 +90,10 @@ class ModifyCSV:
     def _prepare_columns(self) -> None:
         """
         Prepares the columns for the output file by adding the required columns
-        to the beginning and to the end of the list of columns.
+        to the beginning of the list of columns.
         """
         # Add the required columns to the beginning of the list of columns
-        self.columns = ["Hostname"] + self.columns
-        self.columns.append("MAC")
-        self.columns.append("IP")
+        self.columns = ["Hostname", "Data", "host_id", "MAC", "IP"] + self.columns
 
     def _modify(self) -> None:
         try:
@@ -104,52 +102,89 @@ class ModifyCSV:
                 file = self._temp_file
             else:
                 file = self.input_file
-            df = pd.read_csv(file)
+            hosts_df = pd.read_csv(file)
         except (pd.errors.ParserError, FileNotFoundError):
             print(f"Error: The input file {file} is not a valid csv file.")
             return
 
         # Set the columns for the output file
-        df = df[self.columns]
+        hosts_df = hosts_df[self.columns]
 
-        # Forward fill missing values for selected columns
-        columns_to_fill = self.columns.copy()
-        columns_to_fill.remove("IP")
-        df[columns_to_fill] = df[columns_to_fill].ffill()
+        # Set some variables to keep track of the current hostname and the device
+        current_hostname = None
+        is_new_device = True
+
+        # Create variables for each column that will be used to fill in empty values dynamically
+        for column in self.columns:
+            if column not in ["Hostname", "Data", "host_id", "MAC", "IP"]:
+                object.__setattr__(self, "current_" + column.lower(), None)
+
+        # Iterate through the rows of the dataframe
+        for i, row in hosts_df.iterrows():
+            
+            # Get the hostname from the row
+            hostname = row["Hostname"]
+
+            if pd.isna(hostname):
+                # If the hostname is empty, use the current hostname
+                hostname = current_hostname
+                
+                # Set the is_new_device variable to False since the hostname is empty
+                is_new_device = False
+
+                # Fill in the empty hostname
+                hosts_df.at[i, "Hostname"] = hostname
+            else:
+                # If the hostname changes, update the current hostname and set the is_new_device variable to True
+                current_hostname = hostname
+                is_new_device = True
+
+            # Iterate through the columns of the row for each column that will be used to fill in empty values dynamically
+            for column in self.columns:
+                
+                if column not in ["Hostname", "Data", "host_id", "MAC", "IP"]:
+                    
+                    # Get the value of the row for each column
+                    column_value = row[column]
+
+                    if pd.isna(column_value) and not is_new_device:
+                        # If the value is empty, use the current value
+                        column_value = object.__getattribute__(self, "current_" + column.lower())
+                        
+                        # Fill in the empty value
+                        hosts_df.at[i, column] = column_value
+                    else:
+                        if is_new_device:
+                            # If the value changes, update the current value
+                            object.__setattr__(self, "current_" + column.lower(), column_value) 
+
+        # Shift the "MAC" and "host_id" columns down by one row before dropping the duplicate IP entries
+        hosts_df["MAC"] = hosts_df["MAC"].shift(1)
+        hosts_df["host_id"] = hosts_df["host_id"].shift(1)
+        
+        # Shift the Data row up by one row before dropping the duplicate IP entries
+        hosts_df["Data"] = hosts_df["Data"].shift(-1)
+
+        # Drop the rows with duplicate IP entries, keeping the first entry
+        hosts_df.drop_duplicates(subset=["IP"], keep="first", inplace=True)
+
+        # Drop rows with empty IP entries
+        hosts_df.dropna(subset=["IP"], inplace=True)
+
+        # Format the Data and the Hostname columns
+        hosts_df[["Data", "Hostname"]] = hosts_df[["Data", "Hostname"]].apply(lambda x: x.str.replace(".cars.aps.anl.gov", "", regex=False))
+        hosts_df[["Data", "Hostname"]] = hosts_df[["Data", "Hostname"]].apply(lambda x: x.str.replace(".xray.aps.anl.gov", "", regex=False))
+
+        # Format the host_id column
+        hosts_df["host_id"] = hosts_df["host_id"].astype(str)
+        hosts_df["host_id"] = hosts_df["host_id"].str.replace(".0", "") 
 
         # Format the MAC addresses
-        df["MAC"] = df["MAC"].str.replace(":", "", regex=False).str.lower()
-
-        # Format the Hostnames
-        df["Hostname"] = df["Hostname"].str.replace(
-            ".cars.aps.anl.gov", "", regex=False
-        )
-
-        # Convert the IP column to string for grouping and sorting
-        df["IP"] = df["IP"].astype(str)
-
-        # Sort the dataframe by IP and Hostname
-        df.sort_values(by=["IP", "Hostname"], ascending=[True, False], inplace=True)
-
-        # Drop duplicate IP entries and keep the latest Hostname
-        df.drop_duplicates(subset=["IP"], keep="first", inplace=True)
-
-        # Replace duplicate SerialNumber values with NaN
-        if "SerialNumber" in self.columns:
-            df["SerialNumber"] = df["SerialNumber"].where(
-                ~df["SerialNumber"].duplicated(keep="last"), np.nan
-            )
-
-        # Drop NaN IP entries
-        df = df.drop(df[df["IP"] == "nan"].index)
-
-        # Convert the "host_id" column to integer
-        if "host_id" in self.columns:
-            df["host_id"] = df["host_id"].astype(int)
+        hosts_df["MAC"] = hosts_df["MAC"].str.replace(":", "", regex=False).str.lower()
 
         # Write the dataframe to the csv file. If the file already exists,
         # it will be overwritten.
-        df.to_csv(self.output_file, index=False)
+        hosts_df.to_csv(self.output_file, index=False)
 
     def _cleanup(self) -> None:
         """
