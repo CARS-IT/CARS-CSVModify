@@ -59,7 +59,7 @@ class ModifyCSV:
 
     columns: list = field(
         init=False,
-        default_factory=lambda: ["SerialNumber", "Make", "Model", "Status", "Location"], 
+        default_factory=lambda: ["SerialNumber", "Make", "Model", "Status", "Location"],
         compare=False,
     )
 
@@ -121,14 +121,14 @@ class ModifyCSV:
 
         # Iterate through the rows of the dataframe
         for i, row in hosts_df.iterrows():
-            
+
             # Get the hostname from the row
             hostname = row["Hostname"]
 
             if pd.isna(hostname):
                 # If the hostname is empty, use the current hostname
                 hostname = current_hostname
-                
+
                 # Set the is_new_device variable to False since the hostname is empty
                 is_new_device = False
 
@@ -141,27 +141,31 @@ class ModifyCSV:
 
             # Iterate through the columns of the row for each column that will be used to fill in empty values dynamically
             for column in self.columns:
-                
+
                 if column not in ["Hostname", "Data", "host_id", "MAC", "IP"]:
-                    
+
                     # Get the value of the row for each column
                     column_value = row[column]
 
                     if pd.isna(column_value) and not is_new_device:
                         # If the value is empty, use the current value
-                        column_value = object.__getattribute__(self, "current_" + column.lower())
-                        
+                        column_value = object.__getattribute__(
+                            self, "current_" + column.lower()
+                        )
+
                         # Fill in the empty value
                         hosts_df.at[i, column] = column_value
                     else:
                         if is_new_device:
                             # If the value changes, update the current value
-                            object.__setattr__(self, "current_" + column.lower(), column_value) 
+                            object.__setattr__(
+                                self, "current_" + column.lower(), column_value
+                            )
 
         # Shift the "MAC" and "host_id" columns down by one row before dropping the duplicate IP entries
         hosts_df["MAC"] = hosts_df["MAC"].shift(1)
         hosts_df["host_id"] = hosts_df["host_id"].shift(1)
-        
+
         # Shift the Data row up by one row before dropping the duplicate IP entries
         hosts_df["Data"] = hosts_df["Data"].shift(-1)
 
@@ -172,12 +176,16 @@ class ModifyCSV:
         hosts_df.dropna(subset=["IP"], inplace=True)
 
         # Format the Data and the Hostname columns
-        hosts_df[["Data", "Hostname"]] = hosts_df[["Data", "Hostname"]].apply(lambda x: x.str.replace(".cars.aps.anl.gov", "", regex=False))
-        hosts_df[["Data", "Hostname"]] = hosts_df[["Data", "Hostname"]].apply(lambda x: x.str.replace(".xray.aps.anl.gov", "", regex=False))
+        hosts_df[["Data", "Hostname"]] = hosts_df[["Data", "Hostname"]].apply(
+            lambda x: x.str.replace(".cars.aps.anl.gov", "", regex=False)
+        )
+        hosts_df[["Data", "Hostname"]] = hosts_df[["Data", "Hostname"]].apply(
+            lambda x: x.str.replace(".xray.aps.anl.gov", "", regex=False)
+        )
 
         # Format the host_id column
         hosts_df["host_id"] = hosts_df["host_id"].astype(str)
-        hosts_df["host_id"] = hosts_df["host_id"].str.replace(".0", "") 
+        hosts_df["host_id"] = hosts_df["host_id"].str.replace(".0", "")
 
         # Format the MAC addresses
         hosts_df["MAC"] = hosts_df["MAC"].str.replace(":", "", regex=False).str.lower()
