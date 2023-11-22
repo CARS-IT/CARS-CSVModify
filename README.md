@@ -88,4 +88,4 @@ By contributing to CARS-CSVModify, you agree that your contributions will be lic
 CARS-CSVModify is distributed under the MIT license. You should have received a [copy](LICENSE) of the MIT License along with this program. If not, see https://mit-license.org/ for additional details.
 
 ------------
-#### [Christofanis Skordas](mailto:skordasc@uchicago.edu) - Last updated: 20-Sep-2023
+#### [Christofanis Skordas](mailto:skordasc@uchicago.edu) - Last updated: 22-Nov-2023
